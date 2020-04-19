@@ -77,7 +77,7 @@ Before and after saving the buffer, this function runs
                                          filename))
                         (error "Canceled"))))
                 (set-visited-file-name filename)))
-	 
+
 	  (save-restriction
 	    (widen)
 	    (save-excursion
@@ -139,5 +139,20 @@ Before and after saving the buffer, this function runs
       (or noninteractive
           (not called-interactively)
           (files--message "(No changes need to be saved)")))))
+
+(defun row-to-pair (row)
+  (let* ((legacy (car row))
+         (v2 (cadr row)))
+    (if (= (length v2) 0)
+        ";; no row"
+      (concat v2 " " legacy))))
+
+(defun table-to-clj ()
+  (interactive)
+  (unless (org-table-p) (error "Not in an org table"))
+  (org-table-analyze)
+  (with-output-to-temp-buffer "*generated clj*"
+    (let* ((tbl (cddr (org-table-to-lisp))))
+      (print (concat "{" (mapconcat 'row-to-pair tbl "\n") "}")))))
 
 (provide 'jays-clojure-helpers)
